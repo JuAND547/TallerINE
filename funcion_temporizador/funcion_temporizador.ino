@@ -3,6 +3,7 @@ void temporizador();
 
 void setup()
 {
+  
 }
 
 void loop()
@@ -27,3 +28,4 @@ void temporizador() {
   lcd_1.setCursor(0, 1);
   lcd_1.print("0");
 }
+
