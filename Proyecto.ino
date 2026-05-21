@@ -23,9 +23,7 @@ int boton[] = {B1, B2, B3, B4, B5};
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
 unsigned long inicio_juego;
-//unsigned long t_espera;
 int espera_entre_leds;
-//unsigned long t_trascurrido = 0;
 
 int led_actual;
 int boton_actual;
