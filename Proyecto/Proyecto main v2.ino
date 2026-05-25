@@ -23,7 +23,7 @@ int boton[] = {B1, B2, B3, B4, B5};
 
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
-unsigned long inicio_juego;
+//unsigned long inicio_juego;     (uso contador)
 unsigned long espera_entre_leds;
 unsigned long inicio_espera;
 
@@ -38,12 +38,13 @@ int puntaje_total = 0;
 
 bool jugador_listo = false;       //Si está listo el jugador
 bool press = false;              //Si el jugador presionó el botón correspondiente
-
+bool sonido_final_rep = false;
 
 enum EstadoJuego {
   ESPERANDO_JUGADOR,
   ESPERANDO_LED,
   LED_ENCENDIDO,
+  INGRESAR_NOMBRE,
   FIN_JUEGO
 };
 
@@ -53,7 +54,6 @@ EstadoJuego estado;
 
 //DECLARACIÓN DE FUNCIONES
 bool algun_boton_presionado();
-int randomizar_espera();
 void encender(int LED);
 void apagar_leds();
 void sonido(int tipo, int pin);
@@ -61,11 +61,22 @@ void sonido(int tipo, int pin);
     COMIENZO,
     ACIERTO,
     FALLO,
-    LED_ON
+    LED_ON,
+    POCO_TIEMPO,
+    FIN
   };
 
+void est_esperando_jugador();
+void est_esperando_led();
+void est_led_encendido();
+void est_ingresar_nombre();
+void est_fin_juego();
+
+
 int calcular_puntaje(unsigned long t);
-//int enviar_t_reaccion();
+
+void enviar(int puntaje);
+
 //-----------------//-----------------
 
 void setup() {
@@ -94,80 +105,19 @@ void loop() {
   switch (estado) {
 
     case ESPERANDO_JUGADOR:
-
-      if (algun_boton_presionado()) {                // Check si el jugador está listo
-        Serial.println("jugador listo");
-        apagar_leds();
-        delay(100);
-        sonido(COMIENZO, buzzer);
-        delay(1000);
-
-        while(algun_boton_presionado()) {
-        Serial.println("Esperando soltar boton");
-        }
-
-        inicio_cuenta_atrás = millis();
-        inicio_espera = millis();
-        espera_entre_leds = random(1000,3000);
-
-        estado = ESPERANDO_LED;
-      }
+      est_esperando_jugador();
     break;
 
     case ESPERANDO_LED:
-
-      if (millis() - inicio_espera >= espera_entre_leds) {
-
-        led_actual = random(0,5);
-        boton_actual = boton[led_actual];
-
-        encender(led_actual);
-
-        sonido(LED_ON, buzzer);
-
-        t_inicial = millis();
-
-        estado = LED_ENCENDIDO;
-      }
+      est_esperando_led();
     break;
     
     case LED_ENCENDIDO:
-
-      press = (digitalRead(boton_actual) == LOW);
-
-      t_reaccion = millis() - t_inicial;
-
-      if (press) {
-
-        puntaje_total += calcular_puntaje(t_reaccion);
-
-        apagar_leds();
-
-        sonido(ACIERTO, buzzer);
-
-        Serial.print("T_reacción: "); Serial.println(t_reaccion);
-        Serial.print("Puntaje total: "); Serial.println(puntaje_total);
-
-        inicio_espera = millis();
-        espera_entre_leds = random(1000,3000);
-
-        estado = ESPERANDO_LED;
-      }
-
-      if (t_reaccion >= t_reaccion_lim) {
-
-        apagar_leds();
-
-        sonido(FALLO, buzzer);
-        Serial.println("FALLO!");
-
-        Serial.print("Puntaje total: "); Serial.println(puntaje_total);
-
-        inicio_espera = millis();
-        espera_entre_leds = random(1000,3000);
-
-        estado = ESPERANDO_LED;
-      }
+      est_led_encendido();
+    break;
+    
+    case INGRESAR_NOMBRE:
+      est_ingresar_nombre();
     break;
     
     case FIN_JUEGO:
@@ -177,69 +127,7 @@ void loop() {
       Serial.println("FIN");
 
     break;
-  }
-  
-  if (millis() - inicio_juego >= tiempo_de_juego) {
-
-    estado = FIN_JUEGO;
-  }
-
-}
-  
-
-
     
-  
-
-  press = (digitalRead(boton_actual) == LOW);
-
-  if (t_reaccion < t_reaccion_lim) {
-
-    if (!press) {
-      if (millis() - inicio_espera >= espera_entre_leds && esperando_led) {            //En lugar de usar delay(), checkeo que haya pasado el tiempo de espera
-      encender(led_actual);
-      sonido(LED_ON, buzzer);
-      Serial.println("Encendiendo LED");
-
-      t_inicial = millis();
-
-      listo_sig_boton = false;
-      esperando_led = false;
-      led_encendido = true;
-      }
-
-      if (led_encendido) {
-      t_reaccion = millis() - t_inicial;
-      }
-
-    } else {
-      puntaje_total += calcular_puntaje(t_reaccion);
-    
-      Serial.print("T_reacción: "); Serial.println(t_reaccion);
-      Serial.print("Puntaje total: "); Serial.println(puntaje_total);
-
-      sonido(ACIERTO, buzzer);
-      apagar_leds();
-      
-      t_reaccion = 0;
-      listo_sig_boton = true;
-      led_encendido = false;
-    }
-
-  } else {
-    // 0 pts!!!
-    Serial.println("FALLO!!");
-    apagar_leds();
-    sonido(FALLO, buzzer);
-    t_reaccion = 0;
-    listo_sig_boton = true;      //Listo para el siguiente botón
-    led_encendido = false;
-    delay(800); 
-  }
-
-
-  if (fin_de_juego) {
-  //Fin del juego (se terminó el tiempo)
   }
   
 }
@@ -248,7 +136,117 @@ void loop() {
 
 //FUNCIONES
 
+void est_esperando_jugador() {
 
+  lcd_1.setCursor(0,0);
+  lcd_1.print("Presione");
+  lcd_1.setCursor(0,1);
+  lcd_1.print("cualquier boton");
+
+  if (algun_boton_presionado()) {                // Check si el jugador está listo
+    Serial.println("jugador listo");
+
+    apagar_leds();
+    lcd_1.clear();
+
+    delay(50);
+    sonido(COMIENZO, buzzer);
+    delay(1000);
+
+    while(algun_boton_presionado()) {
+      Serial.println("Esperando soltar boton");
+    }
+
+  inicio_cuenta_atras = millis();
+  inicio_espera = millis();
+  espera_entre_leds = random(1000,3000);
+
+  estado = ESPERANDO_LED;
+
+  }
+
+}
+
+void est_esperando_led() {
+
+  if (millis() - inicio_espera >= espera_entre_leds) {
+
+    led_actual = random(0,5);
+    boton_actual = boton[led_actual];
+
+    apagar_leds();
+    encender(led_actual);
+
+    sonido(LED_ON, buzzer);
+
+    t_inicial = millis();
+
+    estado = LED_ENCENDIDO;
+  }
+
+}
+
+void est_led_encendido() {
+
+  press = (digitalRead(boton_actual) == LOW);
+
+  t_reaccion = millis() - t_inicial;
+
+  if (press) {
+
+    puntaje_total += calcular_puntaje(t_reaccion);
+
+    apagar_leds();
+
+    sonido(ACIERTO, buzzer);
+
+    Serial.print("T_reacción: "); Serial.println(t_reaccion);
+    Serial.print("Puntaje total: "); Serial.println(puntaje_total);
+
+    inicio_espera = millis();
+    espera_entre_leds = random(1000,3000);
+
+    estado = ESPERANDO_LED;
+  }
+
+  if (t_reaccion >= t_reaccion_lim) {
+
+    apagar_leds();
+
+    sonido(FALLO, buzzer);
+    Serial.println("FALLO!");
+
+    Serial.print("Puntaje total: "); Serial.println(puntaje_total);
+
+    inicio_espera = millis();
+    espera_entre_leds = random(1000,3000);
+
+    estado = ESPERANDO_LED;
+  }
+
+}
+
+void est_ingresar_nombre() {
+
+  apagar_leds();
+  sonido(FIN, buzzer);
+
+  bool ingresar = false;
+  if (!ingresar) {
+    Serial.println("Ingresar nombre");
+    ingresar = true;
+  }
+
+  lcd_1.setCursor(0,0);
+  lcd_1.print("Ingresar nombre");
+
+}
+
+void est_fin_juego() {
+
+}
+
+//...............................
 
 void apagar_leds() {
   for (int j = 0; j < 5; j++) { 
@@ -262,24 +260,47 @@ void encender(int LED) {
 
 
 int calcular_puntaje(unsigned long t) {
-  return(5000 / t);           //Cálculo del puntaje en base del tiempo de reacción       
+  if (t != 0) {
+    return(5000 / t);           //Cálculo del puntaje en base del tiempo de reacción    
+  } else {
+    return 0;
+  }   
 }
 
 void sonido(int tipo, int pin) {
 
   switch (tipo) {
+
     case COMIENZO:
       tone(pin, 1000, 150);
-	    break;
+	  break;
+
     case ACIERTO:
-      tone(pin, 1200, 100);
-      break;
+      tone(pin, 1800, 100);
+    break;
+
     case FALLO:
       tone(pin, 100, 100);
-      break;
+    break;
+
     case LED_ON:
       tone(pin, 1200, 60);
-      break;
+    break;
+
+    case POCO_TIEMPO:
+      tone(pin, 1400, 60);
+    break;
+
+    case FIN:
+      if (!played) {
+        tone(pin, 1000, 60);
+        delay(200);
+        tone(pin, 1000, 60);
+        delay(200);
+        tone(pin, 1000, 60);
+        sonido_final_rep = true;
+      }
+    break;
   }
 }
 
