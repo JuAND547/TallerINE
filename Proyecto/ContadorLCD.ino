@@ -1,44 +1,48 @@
 #include <Adafruit_LiquidCrystal.h>
 
-void elegir_led();
-void temporizador();
+Adafruit_LiquidCrystal lcd_1(0);
 
+unsigned long inicio_cuenta_atras;
+unsigned long tiempo_transcurrido;
+
+const unsigned long tiempo_de_juego = 60000;
+
+bool fin_de_juego = false;
 
 void setup()
 {
-  for (int i=8; i < 13; i++) { // Declarando LEDs
-    pinMode(i, OUTPUT);
-  }
+  Serial.begin(9600);
+
+  lcd_1.begin(16, 2);
+
+  pinMode(20, OUTPUT);
+  pinMode(21, OUTPUT);
+
+ 
+  
 }
 
 void loop()
 {
- // temporizador();
-  elegir_led();
-  delay(1000);
-}
 
-void temporizador() {
-  Adafruit_LiquidCrystal lcd_1(0);
-  lcd_1.begin(16, 2);
-  lcd_1.print("Tiempo restante");
-  byte seconds = 60;
-   while (seconds > 0) {
-  lcd_1.setCursor(0, 1);
-  lcd_1.print(seconds);
-  lcd_1.setBacklight(1);
-  delay(1000); 
-  seconds --;
-  lcd_1.setCursor(1, 1);
-  lcd_1.print(" ");
+  //while (!jugador_listo) Hace falta aquí???
+
+  tiempo_transcurrido = millis() - inicio_cuenta_atras;
+
+  int segundos_restantes = (tiempo_de_juego - tiempo_transcurrido) / 1000;
+
+  if (segundos_restantes > 0) {
+    lcd_1.setCursor(0,0);
+    lcd_1.print("Puntaje   Tiempo");
+
+    lcd_1.setCursor(12,1);
+    lcd_1.print(segundos_restantes);
+    
+
+  } else {
+    lcd_1.clear();
+    segundos_restantes = 0;
+    fin_de_juego = true;
   }
-  lcd_1.setCursor(0, 1);
-  lcd_1.print("0");
 }
-
-void elegir_led() {
-  byte j = random(8, 13);
-  digitalWrite(j, HIGH);
-  delay(1000);
-  digitalWrite(j, LOW);
-}
+  
