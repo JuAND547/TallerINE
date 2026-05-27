@@ -1,6 +1,17 @@
 //LIBRERÍAS
 
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <BlynkSimpleEsp32.h>
 
+#define BLYNK_TEMPLATE_ID "TU_TEMPLATE_ID"
+#define BLYNK_TEMPLATE_NAME "JuegoReflejos"
+#define BLYNK_AUTH_TOKEN "TU_AUTH_TOKEN"
+
+char ssid[] = "TU_WIFI";
+char pass[] = "PASSWORD";
+
+String scriptURL = "https://script.google.com/macros/s/AKfycbxEP_72Yg_FaDb0ZT7je-9UUNNxtNh0MIzTwpgDGNts08JVuqg0NKNOdoqspMZ26v1amg/exec";
 
 //-----------------//-----------------
 
@@ -21,6 +32,9 @@ int boton[] = {B1, B2, B3, B4, B5};
 
 #define buzzer 13
 
+#define pin_nombre V0
+#define pin_puntaje V1
+
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
 //unsigned long inicio_juego;     (uso contador)
@@ -36,9 +50,12 @@ unsigned long t_reaccion_lim = 2000;     //t límite de reacción desde que se e
 int puntaje_actual;
 int puntaje_total = 0;
 
+String nombre_jugador = "";
+
 bool jugador_listo = false;       //Si está listo el jugador
 bool press = false;              //Si el jugador presionó el botón correspondiente
 bool sonido_final_rep = false;
+bool ingresar_mensaje_final = false;
 
 enum EstadoJuego {
   ESPERANDO_JUGADOR,
@@ -75,13 +92,14 @@ void est_fin_juego();
 
 int calcular_puntaje(unsigned long t);
 
-void enviar(int puntaje);
+void enviar(String nombre, int puntaje);
 
 //-----------------//-----------------
 
 void setup() {
   
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
 
   for (int j = 0; j < 5; j++) {       //Pines de los leds
     pinMode(led[j], OUTPUT);
@@ -102,6 +120,8 @@ void setup() {
 
 void loop() {
 
+  Blynk.run();
+  
   switch (estado) {
 
     case ESPERANDO_JUGADOR:
@@ -231,15 +251,27 @@ void est_ingresar_nombre() {
   apagar_leds();
   sonido(FIN, buzzer);
 
-  bool ingresar = false;
-  if (!ingresar) {
-    Serial.println("Ingresar nombre");
-    ingresar = true;
+  
+  if (!ingresar_mensaje_final) {
+    Serial.println("Ingresar nombre en Blynk");
+    ingresar_mensaje_final = true;
   }
 
   lcd_1.setCursor(0,0);
   lcd_1.print("Ingresar nombre");
+  
+}
 
+BLYNK_WRITE(pin_nombre) {
+
+  nombre_jugador = param.asString();
+
+  enviar(nombre_jugador, puntaje_total);
+
+  Serial.print("Nombre: ");
+  Serial.println(nombre_jugador);
+
+  estado = FIN_JUEGO;
 }
 
 void est_fin_juego() {
@@ -292,7 +324,7 @@ void sonido(int tipo, int pin) {
     break;
 
     case FIN:
-      if (!played) {
+      if (!sonido_final_rep) {
         tone(pin, 1000, 60);
         delay(200);
         tone(pin, 1000, 60);
@@ -315,6 +347,27 @@ bool algun_boton_presionado() {
     }
 
     return false;
+}
+
+void enviar(String nombre, int puntaje) {
+
+  if(WiFi.status() == WL_CONNECTED) {
+
+    HTTPClient http;
+
+    String url = scriptURL +
+                 "?nombre=" + nombre +
+                 "&puntaje=" + String(puntaje);
+
+    http.begin(url);
+
+    int httpCode = http.GET();
+
+    Serial.println(httpCode);
+
+    http.end();
+  }
+
 }
 
 
