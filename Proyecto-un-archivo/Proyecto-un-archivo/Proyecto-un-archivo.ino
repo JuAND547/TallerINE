@@ -50,7 +50,7 @@ int puntaje_total = 0;
 bool jugador_listo = false;       //Si está listo el jugador
 bool press = false;              //Si el jugador presionó el botón correspondiente
 bool sonido_final_rep = false;
-
+bool sonidoactivado = true;
 
 //----------
 unsigned long inicio_cuenta_atras;
@@ -342,38 +342,41 @@ int calcular_puntaje(unsigned long t) {
 
 void sonido(int tipo, int pin) {
 
-  switch (tipo) {
+  if (sonidoactivado) {
 
-    case COMIENZO:
-      tone(pin, 1000, 150);
-	  break;
+    switch (tipo) {
 
-    case ACIERTO:
-      tone(pin, 1800, 100);
-    break;
+      case COMIENZO:
+        tone(pin, 1000, 150);
+	    break;
 
-    case FALLO:
-      tone(pin, 100, 100);
-    break;
+      case ACIERTO:
+        tone(pin, 1800, 100);
+      break;
 
-    case LED_ON:
-      tone(pin, 1200, 60);
-    break;
+      case FALLO:
+        tone(pin, 100, 100);
+      break;
 
-    case POCO_TIEMPO:
-      tone(pin, 1400, 60);
-    break;
+      case LED_ON:
+        tone(pin, 1200, 60);
+      break;
 
-    case FIN:
-      if (!sonido_final_rep) {
-        tone(pin, 1000, 60);
-        delay(200);
-        tone(pin, 1000, 60);
-        delay(200);
-        tone(pin, 1000, 60);
-        sonido_final_rep = true;
-      }
-    break;
+      case POCO_TIEMPO:
+        tone(pin, 1400, 60);
+      break;
+
+      case FIN:
+        if (!sonido_final_rep) {
+          tone(pin, 1000, 60);
+          delay(200);
+          tone(pin, 1000, 60);
+          delay(200);
+          tone(pin, 1000, 60);
+          sonido_final_rep = true;
+        }
+      break;
+    }
   }
 }
 
