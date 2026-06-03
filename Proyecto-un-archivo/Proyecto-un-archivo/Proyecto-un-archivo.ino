@@ -1,3 +1,9 @@
+/*
+
+Este código funciona con ARDUINO UNO
+HIGH LOW esperando
+*/
+
 //LIBRERÍAS
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -22,7 +28,7 @@ int led[] = {L1, L2, L3};
 //#define B5 
 int boton[] = {B1, B2, B3};
 
-const int q = 3;
+const int q = 3;    //Cantidad de LEDs-Botones
 
 #define buzzer 12
 
@@ -54,7 +60,7 @@ int segundos_restantes;
 
 bool beep[] = {false, false, false};
 
-const unsigned long tiempo_de_juego = 10000;
+const unsigned long tiempo_de_juego = 60000;
 
 
 
@@ -137,6 +143,10 @@ void loop() {
     
     case LED_ENCENDIDO:
       est_led_encendido();
+      
+      if (algun_boton_presionado()) {
+        Serial.println("press!!");
+      }
     break;
     
     case INGRESAR_NOMBRE:
@@ -233,11 +243,12 @@ void est_esperando_led() {
 
   if (millis() - inicio_espera >= espera_entre_leds) {
 
-    led_actual = random(0,5);
+    led_actual = random(0,q);
     boton_actual = boton[led_actual];
 
     apagar_leds();
     encender(led_actual);
+    Serial.println(led_actual);
 
     sonido(LED_ON, buzzer);
 
@@ -250,14 +261,14 @@ void est_esperando_led() {
 
 void est_led_encendido() {
 
-  press = (digitalRead(boton_actual) == HIGH);
+  press = (digitalRead(boton_actual) == LOW);
 
   t_reaccion = millis() - t_inicial;
 
   if (press) {
 
     puntaje_total += calcular_puntaje(t_reaccion);
-
+    Serial.println("se calculó puntaje");
     apagar_leds();
 
     sonido(ACIERTO, buzzer);
@@ -371,7 +382,8 @@ bool algun_boton_presionado() {
 
     for (int i = 0; i < q; i++) {
 
-        if (digitalRead(boton[i]) == HIGH) {
+        if (digitalRead(boton[i]) == LOW) {
+            Serial.println("boton presionado");
             return true;
         }
     }
