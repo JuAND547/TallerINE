@@ -5,14 +5,14 @@ app = Flask(__name__)
 
 # Crear la base de datos al iniciar
 def inicializar_db():
-    conn = sqlite3.connect("sensores.db")
+    conn = sqlite3.connect("juego.db")
     cursor = conn.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS jugadores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre VARCHAR(20),
-        puntaje INT,
+        puntaje INT
     )
     """)
 
@@ -20,7 +20,6 @@ def inicializar_db():
     conn.close()
 
 inicializar_db()
-
 # Ruta para recibir datos de la ESP32
 @app.route("/guardar")
 def guardar():
@@ -29,9 +28,9 @@ def guardar():
     puntaje = request.args.get("pun")
 
     if nombre is None or puntaje is None:
-        return "Faltan parámetros", 400
+        return "Faltan parametros", 400
 
-    conn = sqlite3.connect("sensores.db")
+    conn = sqlite3.connect("juego.db")
     cursor = conn.cursor()
 
     cursor.execute(
@@ -48,15 +47,34 @@ def guardar():
 
     return "Datos guardados correctamente"
 
+@app.route("/prueba")
+def prueba():
+    conn = sqlite3.connect("juego.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO jugadores
+        (nombre, puntaje)
+        VALUES (?, ?)
+        """,
+        ("jugador", 100)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return "Datos de prueba insertados"
+
 # Ruta para visualizar los datos
 @app.route("/")
 def mostrar_datos():
 
-    conn = sqlite3.connect("sensores.db")
+    conn = sqlite3.connect("juego.db")
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, temperatura, nombre, puntaje
+        SELECT id, nombre, puntaje
         FROM jugadores
         ORDER BY id DESC
     """)
@@ -93,7 +111,7 @@ def mostrar_datos():
     </head>
     <body>
 
-        <h1>Mediciones</h1>
+        <h1>Ranking</h1>
 
         <table>
             <tr>
