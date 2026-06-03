@@ -1,6 +1,7 @@
-#include <Adafruit_LiquidCrystal.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
-Adafruit_LiquidCrystal lcd_1(0);
+LiquidCrystal_I2C lcd_1(0x27, 16, 2);
 
 unsigned long inicio_cuenta_atras;
 unsigned long tiempo_transcurrido;
@@ -19,7 +20,8 @@ void setup()
 {
   Serial.begin(9600);
 
-  lcd_1.begin(16, 2);
+  lcd_1.init();
+  lcd_1.backlight();
 
 }
 
@@ -39,6 +41,7 @@ void loop()
       lcd_1.print("Puntaje   Tiempo");
 
       lcd_1.setCursor(12,1);
+      lcd_1.print("   ");
       lcd_1.print(segundos_restantes);
     
       if (puntaje_anterior != puntaje_total) {
