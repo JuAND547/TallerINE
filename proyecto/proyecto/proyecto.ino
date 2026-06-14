@@ -302,15 +302,27 @@ void est_ingresar_nombre() {
   apagar_leds();
   sonido(FIN, buzzer);
 
-  bool ingresar = false;
-  if (!ingresar) {
-    Serial.println("Ingresar nombre");
-    ingresar = true;
+  lcd_1.setCursor(0,0);
+  lcd_1.print("Ingrese nombre");
+
+  if (Serial.available()) {
+
+    nombre_jugador = Serial.readStringUntil('\n');
+    nombre_jugador.trim();
+
+    nombre_ingresado = true;
+
+    Serial.print("Nombre: ");
+    Serial.println(nombre_jugador);
+
+  if (conectarse_al_wifi()) {
+    guardar(nombre_jugador, puntaje_total);
+  } else {
+    Serial.println("No se pudo conectar al WiFi");
   }
 
-  lcd_1.setCursor(0,0);
-  lcd_1.print("Ingresar nombre");
-
+    estado = FIN_JUEGO;
+  }
 }
 
 void est_fin_juego() {
@@ -405,11 +417,24 @@ void beep_poco_tiempo() {
 
 }
 
+void conectarse_al_wifi() {
+  const char* ssid = "wifing";
+  const char* password = "TU_PASSWORD";
+  WiFi.begin(ssid, password);
+
+while (WiFi.status() != WL_CONNECTED) {
+  delay(500);
+  Serial.print(".");
+}
+
+Serial.println("WiFi conectado");
+}
+
 void guardar(String nombre, int puntaje) {
    HTTPClient http;
 
     String url =
-        "http://127.0.0.1:5000/guardar?nomp=" +
+        "http://172.16.113.20:5000/guardar?nom=" +
         nombre +
         "&pun=" +
         String(puntaje;
