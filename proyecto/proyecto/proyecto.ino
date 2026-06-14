@@ -1,6 +1,8 @@
 //LIBRERÍAS
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 LiquidCrystal_I2C lcd_1(0x27, 16, 2);
 
@@ -400,6 +402,28 @@ void beep_poco_tiempo() {
     }
 
   }
+
+}
+
+void guardar(String nombre, int puntaje) {
+   HTTPClient http;
+
+    String url =
+        "http://127.0.0.1:5000/guardar?nomp=" +
+        nombre +
+        "&pun=" +
+        String(puntaje;
+
+    http.begin(url);
+
+    int codigo = http.GET();
+
+    if(codigo > 0)
+    {
+        Serial.println("Datos enviados");
+    }
+
+    http.end();
 
 }
 
