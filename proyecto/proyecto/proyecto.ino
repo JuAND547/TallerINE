@@ -108,7 +108,7 @@ void prueba_conexion();
 
 void setup() {
   Serial.begin(9600);
-
+  prueba_conexion(); 
   lcd_1.init();
   lcd_1.backlight();
 
@@ -122,18 +122,14 @@ void setup() {
 
   pinMode(buzzer, OUTPUT);
 
-  randomSeed(analogRead(A0));    //Elijo seed para randomizaciones
-  conectarse_al_wifi();         
-  prueba_conexion();  
+  randomSeed(analogRead(A0));    //Elijo seed para randomizaciones       
+ 
   estado = ESPERANDO_JUGADOR;
 }
 
 //-----------------//-----------------
 
 void loop() {
-  digitalWrite(2, HIGH);
-  delay(1000);
-  digitalWrite(2, LOW);
   switch (estado) {
 
     case ESPERANDO_JUGADOR:
@@ -420,6 +416,7 @@ void beep_poco_tiempo() {
 }
 
 void conectarse_al_wifi() {
+  Serial.println("Entró a la funcion de conexion");
   const char* ssid = "wifing";
   const char* password = "wifing-pub";
   WiFi.begin(ssid, password);
@@ -455,6 +452,7 @@ void guardar(String nombre, int puntaje) {
 }
 
 void prueba_conexion() {
+  Serial.println("Entró a la función de prueba");
    HTTPClient http;
 
     String url =
