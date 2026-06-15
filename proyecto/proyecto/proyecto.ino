@@ -53,7 +53,6 @@ unsigned long inicio_cuenta_atras;
 unsigned long tiempo_transcurrido;
 int puntaje_anterior = 0;
 int segundos_restantes;
-
 bool beep[] = {false, false, false};
 
 const unsigned long tiempo_de_juego = 60000;
@@ -99,10 +98,15 @@ int calcular_puntaje(unsigned long t);
 
 void enviar(int puntaje);
 
+void conectarse_al_wifi();
+
+void guardar(String nombre, int puntaje);
+
+void prueba_conexion();
+
 //-----------------//-----------------
 
 void setup() {
-  
   Serial.begin(9600);
 
   lcd_1.init();
@@ -118,8 +122,9 @@ void setup() {
 
   pinMode(buzzer, OUTPUT);
 
-  randomSeed(analogRead(A0));         //Elijo seed para randomizaciones
-
+  randomSeed(analogRead(A0));    //Elijo seed para randomizaciones
+  conectarse_al_wifi();         
+  prueba_conexion();  
   estado = ESPERANDO_JUGADOR;
 }
 
@@ -304,22 +309,19 @@ void est_ingresar_nombre() {
 
   lcd_1.setCursor(0,0);
   lcd_1.print("Ingrese nombre");
-
+  String nombre_jugador;
   if (Serial.available()) {
 
     nombre_jugador = Serial.readStringUntil('\n');
     nombre_jugador.trim();
 
-    nombre_ingresado = true;
-
     Serial.print("Nombre: ");
     Serial.println(nombre_jugador);
 
-  if (conectarse_al_wifi()) {
+    conectarse_al_wifi();
     guardar(nombre_jugador, puntaje_total);
-  } else {
+   
     Serial.println("No se pudo conectar al WiFi");
-  }
 
     estado = FIN_JUEGO;
   }
@@ -419,7 +421,7 @@ void beep_poco_tiempo() {
 
 void conectarse_al_wifi() {
   const char* ssid = "wifing";
-  const char* password = "TU_PASSWORD";
+  const char* password = "wifing-pub";
   WiFi.begin(ssid, password);
 
 while (WiFi.status() != WL_CONNECTED) {
@@ -434,10 +436,10 @@ void guardar(String nombre, int puntaje) {
    HTTPClient http;
 
     String url =
-        "http://172.16.113.20:5000/guardar?nom=" +
+        "http://172.16.113.21:5000/guardar?nom=" +
         nombre +
         "&pun=" +
-        String(puntaje;
+        String(puntaje);
 
     http.begin(url);
 
@@ -451,5 +453,27 @@ void guardar(String nombre, int puntaje) {
     http.end();
 
 }
+
+void prueba_conexion() {
+   HTTPClient http;
+
+    String url =
+        "http://172.16.113.21:5000/prueba";
+
+    http.begin(url);
+
+    int codigo = http.GET();
+
+    if(codigo > 0)
+    {
+        Serial.println("Funcionó");
+    } else {
+      Serial.println("No funcionó :c");
+    }
+
+    http.end();
+
+}
+
 
 //-----------------//-----------------
