@@ -12,19 +12,19 @@ hd44780_I2Cexp lcd_1;
 //-----------------//-----------------
 
 //PINES Y VARIABLES GLOBALES
-#define L1 27
-#define L2 26
-#define L3 25
-#define L4 33
-#define L5 32 
-int led[] = {L1, L2, L3, L4, L5};
+#define L_Rojo 33
+#define L_Amarillo 25
+#define L_Azul 32 
+#define L_Verde 26 
+#define L_Blanco 27
+int led[] = {L_Rojo, L_Amarillo, L_Azul, L_Verde, L_Blanco};
 
-#define B1 5
-#define B2 18
-#define B3 4
-#define B4 16
-#define B5 17
-int boton[] = {B1, B2, B3, B4, B5};
+#define B_Rojo 18
+#define B_Amarillo 17 
+#define B_Azul 5
+#define B_Verde 4
+#define B_Blanco 16
+int boton[] = {B_Rojo, B_Amarillo, B_Azul, B_Verde, B_Blanco};
 
 const int q = 5;    //Cantidad de LEDs y Botones
 
@@ -115,6 +115,7 @@ void setup() {
 
   for (int j = 0; j < q; j++) {
     pinMode(led[j], OUTPUT);
+    digitalWrite(led[j], HIGH);
   }
 
   for (int j = 0; j < q; j++) {
