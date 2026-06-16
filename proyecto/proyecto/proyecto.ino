@@ -17,18 +17,18 @@ hd44780_I2Cexp lcd_1;
 #define L3 25
 #define L4 33
 #define L5 32 
-int led[] = {L1, L2, L3};
+int led[] = {L1, L2, L3, L4, L5};
 
-#define B1 15
-#define B2 2
+#define B1 5
+#define B2 18
 #define B3 4
-#define B4 RX2
-#define B5 TX2
-int boton[] = {B1, B2, B3};
+#define B4 16
+#define B5 17
+int boton[] = {B1, B2, B3, B4, B5};
 
 const int q = 5;    //Cantidad de LEDs y Botones
 
-#define buzzer 5
+#define buzzer 19
 
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
@@ -110,42 +110,27 @@ void prueba_conexion();
 //-----------------//-----------------
 
 void setup() {
+  lcd_1.begin(16, 2);
   Serial.begin(115200);
-  Serial.println("1");
-
-  conectarse_al_wifi();
-  Serial.println("2");
-
-  prueba_conexion();
-  Serial.println("3");
-
-  lcd_1.begin(16,2);
-  Serial.println("4");
 
   for (int j = 0; j < q; j++) {
     pinMode(led[j], OUTPUT);
   }
-  Serial.println("5");
 
   for (int j = 0; j < q; j++) {
     pinMode(boton[j], INPUT_PULLUP);
   }
-  Serial.println("6");
 
   pinMode(buzzer, OUTPUT);
-  Serial.println("7");
 
   randomSeed(micros());
-  Serial.println("8");
 
   estado = ESPERANDO_JUGADOR;
-  Serial.println("9");
 }
 
 //-----------------//-----------------
 
 void loop() {
-  Serial.println("Entró a Loop");
   switch (estado) {
 
     case ESPERANDO_JUGADOR:
