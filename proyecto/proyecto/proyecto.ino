@@ -15,20 +15,20 @@ hd44780_I2Cexp lcd_1;
 #define L1 27
 #define L2 26
 #define L3 25
-//#define 33
-//#define 32 
+#define L4 33
+#define L5 32 
 int led[] = {L1, L2, L3};
 
-#define B1 5
-#define B2 4
-#define B3 3
-//#define B4 
-//#define B5 
+#define B1 15
+#define B2 2
+#define B3 4
+#define B4 RX2
+#define B5 TX2
 int boton[] = {B1, B2, B3};
 
-const int q = 3;    //Cantidad de LEDs-Botones
+const int q = 5;    //Cantidad de LEDs y Botones
 
-#define buzzer 12
+#define buzzer 5
 
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
