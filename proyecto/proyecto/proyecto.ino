@@ -1,20 +1,22 @@
 //LIBRERÍAS
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+//#include <LiquidCrystal_I2C.h>
+#include <hd44780.h>
+#include <hd44780ioClass/hd44780_I2Cexp.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-LiquidCrystal_I2C lcd_1(0x27, 16, 2);
+hd44780_I2Cexp lcd_1;
 
 
 //-----------------//-----------------
 
 //PINES Y VARIABLES GLOBALES
-#define L1 11
-#define L2 10
-#define L3 9
-//#define L4 
-//#define L5 
+#define L1 27
+#define L2 26
+#define L3 25
+//#define 33
+//#define 32 
 int led[] = {L1, L2, L3};
 
 #define B1 5
@@ -37,6 +39,7 @@ unsigned long inicio_espera;
 int led_actual;
 int boton_actual;
 
+String nombre_jugador;
 
 unsigned long t_reaccion_lim = 2000;     //t límite de reacción desde que se enciende un led random
 
@@ -107,29 +110,42 @@ void prueba_conexion();
 //-----------------//-----------------
 
 void setup() {
-  Serial.begin(9600);
-  prueba_conexion(); 
-  lcd_1.init();
-  lcd_1.backlight();
+  Serial.begin(115200);
+  Serial.println("1");
 
-  for (int j = 0; j < q; j++) {       //Pines de los leds
+  conectarse_al_wifi();
+  Serial.println("2");
+
+  prueba_conexion();
+  Serial.println("3");
+
+  lcd_1.begin(16,2);
+  Serial.println("4");
+
+  for (int j = 0; j < q; j++) {
     pinMode(led[j], OUTPUT);
   }
+  Serial.println("5");
 
-  for (int j = 0; j < q; j++) {       //Pines de los botones
+  for (int j = 0; j < q; j++) {
     pinMode(boton[j], INPUT_PULLUP);
   }
+  Serial.println("6");
 
   pinMode(buzzer, OUTPUT);
+  Serial.println("7");
 
-  randomSeed(analogRead(A0));    //Elijo seed para randomizaciones       
- 
+  randomSeed(micros());
+  Serial.println("8");
+
   estado = ESPERANDO_JUGADOR;
+  Serial.println("9");
 }
 
 //-----------------//-----------------
 
 void loop() {
+  Serial.println("Entró a Loop");
   switch (estado) {
 
     case ESPERANDO_JUGADOR:
@@ -305,7 +321,6 @@ void est_ingresar_nombre() {
 
   lcd_1.setCursor(0,0);
   lcd_1.print("Ingrese nombre");
-  String nombre_jugador;
   if (Serial.available()) {
 
     nombre_jugador = Serial.readStringUntil('\n');
@@ -316,8 +331,8 @@ void est_ingresar_nombre() {
 
     conectarse_al_wifi();
     guardar(nombre_jugador, puntaje_total);
-   
-    Serial.println("No se pudo conectar al WiFi");
+    WiFi.disconnect(true); // Desconecto la ESP32 del wifi después de guardar
+    WiFi.mode(WIFI_OFF);
 
     estado = FIN_JUEGO;
   }
@@ -461,6 +476,8 @@ void prueba_conexion() {
     http.begin(url);
 
     int codigo = http.GET();
+    Serial.print("Codigo HTTP: ");
+    Serial.println(codigo);
 
     if(codigo > 0)
     {
