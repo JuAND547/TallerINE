@@ -115,7 +115,6 @@ void setup() {
 
   for (int j = 0; j < q; j++) {
     pinMode(led[j], OUTPUT);
-    digitalWrite(led[j], HIGH);
   }
 
   for (int j = 0; j < q; j++) {
@@ -158,7 +157,7 @@ void loop() {
 
       apagar_leds();
 
-      Serial.println("FIN");
+      est_fin_juego();
 
     break;
     
@@ -209,7 +208,10 @@ void loop() {
 //FUNCIONES
 
 void est_esperando_jugador() {
-
+  puntaje_total = 0;
+    for (int j = 0; j < q; j++) {
+    digitalWrite(led[j], HIGH);
+  }
   lcd_1.setCursor(0,0);
   lcd_1.print("Presione");
   lcd_1.setCursor(0,1);
@@ -301,7 +303,6 @@ void est_led_encendido() {
 }
 
 void est_ingresar_nombre() {
-
   apagar_leds();
   sonido(FIN, buzzer);
 
@@ -325,7 +326,8 @@ void est_ingresar_nombre() {
 }
 
 void est_fin_juego() {
-
+lcd_1.clear();
+estado = ESPERANDO_JUGADOR;
 }
 
 //...............................
@@ -434,7 +436,7 @@ void guardar(String nombre, int puntaje) {
    HTTPClient http;
 
     String url =
-        "http://172.16.113.21:5000/guardar?nom=" +
+        "http://172.16.113.24:5000/guardar?nom=" +
         nombre +
         "&pun=" +
         String(puntaje);
@@ -457,7 +459,7 @@ void prueba_conexion() {
    HTTPClient http;
 
     String url =
-        "http://172.16.113.21:5000/prueba";
+        "http://172.16.113.24:5000/prueba";
 
     http.begin(url);
 
