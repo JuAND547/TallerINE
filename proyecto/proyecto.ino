@@ -1,6 +1,5 @@
 //LIBRERÍAS
 #include <Wire.h>
-//#include <LiquidCrystal_I2C.h>
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Cexp.h>
 #include <WiFi.h>
