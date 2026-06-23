@@ -47,25 +47,6 @@ def guardar():
 
     return "Datos guardados correctamente"
 
-@app.route("/prueba")
-def prueba():
-    conn = sqlite3.connect("juego.db")
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO jugadores
-        (nombre, puntaje)
-        VALUES (?, ?)
-        """,
-        ("jugador", 100)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return "Datos de prueba insertados"
-
 # Ruta para visualizar los datos
 @app.route("/")
 def mostrar_datos():
