@@ -30,6 +30,7 @@ const int q = 5;    //Cantidad de LEDs y Botones
 
 #define buzzer 19
 
+const unsigned long tiempo_de_juego = 60 * 1000;
 unsigned long t_inicial;
 unsigned long t_reaccion = 0;
 
@@ -41,8 +42,6 @@ int boton_actual;
 
 String nombre_jugador;
 
-unsigned long t_reaccion_lim = 2000;     //t límite de reacción desde que se enciende un led random
-
 int puntaje_actual;
 int puntaje_total = 0;
 
@@ -50,17 +49,13 @@ bool jugador_listo = false;       //Si está listo el jugador
 bool press = false;              //Si el jugador presionó el botón correspondiente
 bool sonido_final_rep = false;
 bool sonidoactivado = true;
-
+unsigned long t_reaccion_lim = 2000;
 //----------
 unsigned long inicio_cuenta_atras;
 unsigned long tiempo_transcurrido;
 int puntaje_anterior = 0;
 int segundos_restantes;
 bool beep[] = {false, false, false};
-
-const unsigned long tiempo_de_juego = 60000;
-
-
 
 enum EstadoJuego {
   ESPERANDO_JUGADOR,
@@ -104,8 +99,6 @@ void enviar(int puntaje);
 void conectarse_al_wifi();
 
 void guardar(String nombre, int puntaje);
-
-void prueba_conexion();
 
 //-----------------//-----------------
 
@@ -327,6 +320,9 @@ void est_ingresar_nombre() {
 
 void est_fin_juego() {
 lcd_1.clear();
+lcd_1.print(nombre_jugador + " Pts: " + puntaje_total);
+delay(5000);
+lcd_1.clear();
 estado = ESPERANDO_JUGADOR;
 }
 
@@ -436,7 +432,7 @@ void guardar(String nombre, int puntaje) {
    HTTPClient http;
 
     String url =
-        "http://172.16.113.24:5000/guardar?nom=" +
+        "http://172.16.113.25:5000/guardar?nom=" +
         nombre +
         "&pun=" +
         String(puntaje);
@@ -453,30 +449,5 @@ void guardar(String nombre, int puntaje) {
     http.end();
 
 }
-
-void prueba_conexion() {
-  Serial.println("Entró a la función de prueba");
-   HTTPClient http;
-
-    String url =
-        "http://172.16.113.24:5000/prueba";
-
-    http.begin(url);
-
-    int codigo = http.GET();
-    Serial.print("Codigo HTTP: ");
-    Serial.println(codigo);
-
-    if(codigo > 0)
-    {
-        Serial.println("Funcionó");
-    } else {
-      Serial.println("No funcionó :c");
-    }
-
-    http.end();
-
-}
-
 
 //-----------------//-----------------
