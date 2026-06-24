@@ -3,10 +3,13 @@ JUEGO DE REFLEJOS "COLOR REACTOR"
 Pasos para ejecutar el código:
 
 1- Asegurarse de tener las librerías que aparecen en el comienzo del código.
-2- Llenar las variables "ssid" y "password" por la red Wi-Fi y la contraseña que usarás, respectivamente.
-3- Ajustar los pines/conexiones.
-4- Ejecutar código en ESP32.
-5- ¡Jugar!
+2- Asegurarse de tener Python instalado.
+3- Llenar las variables "ssid" y "password" por la red Wi-Fi y la contraseña que usarás, respectivamente.
+4- Ajustar los pines/conexiones.
+5- Ejecutar pagina/bd.py la terminal.
+6- Cambiar solo la ip de la línea 434 por la ip del dispositivo donde se haya ejecutado pagina/bd.py.
+7- Ejecutar código en ESP32.
+8- ¡Jugar!
 
 Modificaciones adicionales:
 
